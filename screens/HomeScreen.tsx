@@ -15,6 +15,61 @@ import Icon from '../components/icon';
 import {Buffer} from 'buffer';
 global.Buffer = global.Buffer || Buffer;
 
+const uploadImage = async (imageAsset: any): Promise<string> => {
+  // const uri = imageAsset.uri;
+  // const filename = imageAsset.fileName || uri.split('/').pop();
+  // const type = imageAsset.type || 'image/jpeg';
+  console.log('imageAsset', imageAsset);
+
+  const formData = new FormData();
+  formData.append('file', {
+    uri: imageAsset.uri,
+    name: imageAsset.fileName || 'photo.jpg',
+    type: imageAsset.type || 'image/jpeg',
+  });
+
+  try {
+    const res = await fetch(
+      'https://mqj.auj.mybluehost.me/harir/wp-json/wp/v2/media',
+      {
+        method: 'POST',
+        headers: {
+          Authorization:
+            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL21xai5hdWoubXlibHVlaG9zdC5tZS9oYXJpciIsImlhdCI6MTc0NTI1NzQ1MSwibmJmIjoxNzQ1MjU3NDUxLCJleHAiOjE3NDU4NjIyNTEsImRhdGEiOnsidXNlciI6eyJpZCI6IjIifX19.kS9a2cSZf_22XrCBgxVQqz6mW5FRbQPXS-v7iVfjpnU',
+        },
+        body: formData,
+      },
+    );
+    const json = await res.json();
+    console.log('Upload response:', json);
+
+    if (!res.ok) {
+      throw new Error(json.message || 'Upload failed');
+    }
+
+    return json.source_url;
+  } catch (error) {
+    console.error('Upload failed:', error);
+    throw error;
+  }
+};
+//     const text = await res.text();
+//     console.log('Upload response:', text);
+//     // console.log('Upload response:', json);
+//     // if (!res.ok) {
+//     //   console.log('Upload error response:', json);
+//     //   throw new Error('Upload failed');
+//     // }
+
+//     // console.log('Image uploaded:', json.source_url);
+//     // return json.source_url;
+//     return '';
+//   } catch (error) {
+//     console.error('Upload failed:', error);
+//     throw error;
+//   }
+// };
+
 const HomeScreen = () => {
   const [mainImage, setMainImage] = useState<any>(null);
   const [extraImages, setExtraImages] = useState<any[]>([
@@ -32,57 +87,69 @@ const HomeScreen = () => {
   const [showProducts, setShowProducts] = useState(false);
 
   const handleSave = async () => {
-    const product = {
-      name,
-      type: 'simple',
-      regular_price: price,
-      description,
-      categories: [{name: category}],
-      manage_stock: limitedQuantity,
-      status: showProducts ? 'publish' : 'draft',
-    };
-
-    //  const consumerKey = 'YOUR_CONSUMER_KEY';
-    // const consumerSecret = 'YOUR_CONSUMER_SECRET';
-    const apiUrl = `https://mqj.auj.mybluehost.me/harir/wp-json/wc/v3/products`;
-
-    // const credentials = Buffer.from(
-    //   `${consumerKey}:${consumerSecret}`,
-    // ).toString('base64');
-
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-          Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL21xai5hdWoubXlibHVlaG9zdC5tZS9oYXJpciIsImlhdCI6MTc0NDc5Mzg1NiwibmJmIjoxNzQ0NzkzODU2LCJleHAiOjE3NDUzOTg2NTYsImRhdGEiOnsidXNlciI6eyJpZCI6IjIifX19.Yz1xM21QP2DcJmXj8Z1jhkFxlR5psGoDyo8_9t8ZZxg`,
-        },
-        body: JSON.stringify(product),
-      });
-      const res = await fetch(
-        'https://mqj.auj.mybluehost.me/harir/wp-json/wc/v3/products',
-        {
-          headers: {
-            Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL21xai5hdWoubXlibHVlaG9zdC5tZS9oYXJpciIsImlhdCI6MTc0NDc5Mzg1NiwibmJmIjoxNzQ0NzkzODU2LCJleHAiOjE3NDUzOTg2NTYsImRhdGEiOnsidXNlciI6eyJpZCI6IjIifX19.Yz1xM21QP2DcJmXj8Z1jhkFxlR5psGoDyo8_9t8ZZxg`,
-          },
-        },
-      );
-      const data = await res.json();
-      console.log(data);
-
-      const resText = await response.text(); // <-- get raw response
-      if (!response.ok) {
-        console.log('Raw response:', resText);
-        throw new Error(`Server responded with ${response.status}`);
+      let imageUrl = '';
+      if (mainImage?.uri) {
+        imageUrl = await uploadImage(mainImage);
       }
 
-      const resData = JSON.parse(resText);
-      console.log('Product created:', resData);
-      Alert.alert('تم حفظ المنتج بنجاح!');
-    } catch (err: any) {
-      console.error('API error:', err.message || err);
-      Alert.alert('فشل الحفظ على السيرفر. تحقق من الاتصال أو البيانات.');
+      console.log('Main image URL:', imageUrl);
+      const product = {
+        name,
+        type: 'simple',
+        regular_price: price,
+        description,
+        categories: [{name: category}],
+        manage_stock: limitedQuantity,
+        status: showProducts ? 'publish' : 'draft',
+        images: imageUrl ? [{src: imageUrl}] : [],
+      };
+
+      //  const consumerKey = 'YOUR_CONSUMER_KEY';
+      // const consumerSecret = 'YOUR_CONSUMER_SECRET';
+      const apiUrl = `https://mqj.auj.mybluehost.me/harir/wp-json/wc/v3/products`;
+
+      // const credentials = Buffer.from(
+      //   `${consumerKey}:${consumerSecret}`,
+      // ).toString('base64');
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL21xai5hdWoubXlibHVlaG9zdC5tZS9oYXJpciIsImlhdCI6MTc0NDc5Mzg1NiwibmJmIjoxNzQ0NzkzODU2LCJleHAiOjE3NDUzOTg2NTYsImRhdGEiOnsidXNlciI6eyJpZCI6IjIifX19.Yz1xM21QP2DcJmXj8Z1jhkFxlR5psGoDyo8_9t8ZZxg`,
+          },
+          body: JSON.stringify(product),
+        });
+        const res = await fetch(
+          'https://mqj.auj.mybluehost.me/harir/wp-json/wc/v3/products',
+          {
+            headers: {
+              Authorization: `Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL21xai5hdWoubXlibHVlaG9zdC5tZS9oYXJpciIsImlhdCI6MTc0NDc5Mzg1NiwibmJmIjoxNzQ0NzkzODU2LCJleHAiOjE3NDUzOTg2NTYsImRhdGEiOnsidXNlciI6eyJpZCI6IjIifX19.Yz1xM21QP2DcJmXj8Z1jhkFxlR5psGoDyo8_9t8ZZxg`,
+            },
+          },
+        );
+        const data = await res.json();
+        console.log(data);
+
+        const resText = await response.text(); // <-- get raw response
+        if (!response.ok) {
+          console.log('Raw response:', resText);
+          throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const resData = JSON.parse(resText);
+        console.log('Product created:', resData);
+        Alert.alert('تم حفظ المنتج بنجاح!');
+      } catch (err: any) {
+        console.error('API error:', err.message || err);
+        Alert.alert('فشل الحفظ على السيرفر. تحقق من الاتصال أو البيانات.');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('فشل تحميل الصورة. تحقق من الاتصال أو البيانات.');
     }
   };
 
@@ -137,14 +204,20 @@ const HomeScreen = () => {
           keyboardType="numeric"
         />
       </View>
-
-      <Picker
-        style={{backgroundColor: 'black'}}
-        placeholder="أضف وصف المنتج"
-        selectedValue={category}
-        onValueChange={itemValue => setCategory(itemValue)}>
-        <Picker.Item label="simple" value="electronics" />
-      </Picker>
+      <View
+        style={{
+          flex: 1,
+          borderWidth: 1,
+          borderRadius: 10,
+          borderColor: '#ccc',
+        }}>
+        <Picker
+          placeholder="أضف فئة المنتج"
+          selectedValue={category}
+          onValueChange={itemValue => setCategory(itemValue)}>
+          <Picker.Item label="simple" />
+        </Picker>
+      </View>
       <TextInput
         placeholder="أضف وصف المنتج"
         style={[styles.input, {height: 80}]}

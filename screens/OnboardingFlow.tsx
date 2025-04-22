@@ -72,7 +72,7 @@ const OnboardingFlow: React.FC = ({navigation}: any) => {
           <View style={[styles.dot, step === 2 ? styles.activeDot : null]} />
         </View>
         <CustomButton
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('Login')}
           type="TERTIARY"
           text="تخطي"
         />
