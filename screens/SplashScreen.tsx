@@ -36,7 +36,8 @@ const SplashScreen: React.FC<SplashScreenProps> = ({navigation}) => {
 
     const timeout = setTimeout(checkAuthStatus, 1500);
     return () => clearTimeout(timeout);
-  }, [navigation]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

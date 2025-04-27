@@ -30,8 +30,10 @@ I18nManager.forceRTL(true);
 
 const LoginScreen = () => {
   const navigation = useNavigation<LoginScreenNavigationProp>();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(__DEV__ ? 'brobrhooom1' : '');
+  const [password, setPassword] = useState(
+    __DEV__ ? '%23QHXIDO2nQv8GijeO8' : '',
+  );
 
   const handleLogin = async () => {
     try {
@@ -163,6 +165,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
+    height: 50,
     borderWidth: 1,
     borderColor: '#000',
     borderRadius: 30,

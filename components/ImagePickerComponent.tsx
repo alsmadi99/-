@@ -1,11 +1,19 @@
 import React from 'react';
-import {TouchableOpacity, Image, StyleSheet, Alert, Text} from 'react-native';
+import {
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Alert,
+  Text,
+  View,
+} from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import Icon from './icon';
 type Props = {
   image: any;
   onPick: (asset: any) => void;
   extraStyle?: object;
+  imageExtraStyle?: object;
   text?: string;
   customIcon?: React.ReactNode;
 };
@@ -14,6 +22,7 @@ const ImagePickerComponent: React.FC<Props> = ({
   image,
   onPick,
   extraStyle,
+  imageExtraStyle,
   text,
   customIcon,
 }) => {
@@ -42,24 +51,36 @@ const ImagePickerComponent: React.FC<Props> = ({
   };
 
   return (
-    <TouchableOpacity style={extraStyle} onPress={handleSelectImage}>
-      {image?.uri ? (
-        <Image source={{uri: image.uri}} style={(styles.image, extraStyle)} />
-      ) : (
-        <React.Fragment>
-          <TouchableOpacity
-            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}
-            onPress={handleSelectImage}>
+    <View style={[{width: '100%'}, extraStyle]}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        style={[
+          {
+            width: '100%',
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+        ]}
+        onPress={handleSelectImage}>
+        {image?.uri ? (
+          <Image
+            source={{uri: image.uri}}
+            style={[styles.image, imageExtraStyle]}
+            resizeMode="cover"
+          />
+        ) : (
+          <>
             {customIcon ? (
               customIcon
             ) : (
               <Icon type="ant" name="pluscircleo" color="black" size={20} />
             )}
             {text && <Text>{text}</Text>}
-          </TouchableOpacity>
-        </React.Fragment>
-      )}
-    </TouchableOpacity>
+          </>
+        )}
+      </TouchableOpacity>
+    </View>
   );
 };
 

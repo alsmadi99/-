@@ -1,15 +1,24 @@
 import React, {useState} from 'react';
-import {SafeAreaView, View, Text, Image, StyleSheet} from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import CustomButton from '../components/CustomButton';
-// Adjust the import path as needed
+
 const OnboardingFlow: React.FC = ({navigation}: any) => {
   const [step, setStep] = useState(1); // 1 = first screen, 2 = second screen
+
+  const screenWidth = Dimensions.get('window').width;
+  const imageSize = (screenWidth - 60) / 2; // 20 margin left, 20 right, 10 gap between images
 
   const handleNext = () => {
     if (step === 1) {
       setStep(2);
     } else {
-      // navigate to Login or trigger a prop callback
       navigation.navigate('Login');
     }
   };
@@ -17,7 +26,6 @@ const OnboardingFlow: React.FC = ({navigation}: any) => {
   return (
     <SafeAreaView style={styles.container}>
       {step === 1 ? (
-        // === Screen 1 ===
         <>
           <View style={styles.logoContainer}>
             <Image
@@ -30,29 +38,38 @@ const OnboardingFlow: React.FC = ({navigation}: any) => {
           <Text style={styles.textStyle}>معد لأصحاب المتاجر</Text>
         </>
       ) : (
-        // === Screen 2 ===
         <>
           <View style={styles.imageGridContainer}>
             <View style={styles.imageRow}>
               <Image
                 source={require('../assets/Maskgroup2.png')}
-                style={styles.gridImage1}
+                style={[
+                  styles.gridImage,
+                  {width: imageSize, height: imageSize * 2},
+                ]}
               />
-
               <Image
                 source={require('../assets/Maskgroup1.png')}
-                style={styles.gridImage2}
+                style={[
+                  styles.gridImage,
+                  {width: imageSize, height: imageSize * 1.6},
+                ]}
               />
             </View>
             <View style={styles.imageRow}>
               <Image
                 source={require('../assets/Maskgroup4.png')}
-                style={styles.gridImage3}
+                style={[
+                  styles.gridImage,
+                  {width: imageSize, height: imageSize * 1},
+                ]}
               />
-
               <Image
                 source={require('../assets/Maskgroup3.png')}
-                style={styles.gridImage4}
+                style={[
+                  styles.gridImage,
+                  {width: imageSize, height: imageSize * 1.5},
+                ]}
               />
             </View>
           </View>
@@ -64,7 +81,6 @@ const OnboardingFlow: React.FC = ({navigation}: any) => {
         </>
       )}
 
-      {/* Buttons + Dots */}
       <View style={styles.buttonContainer}>
         <CustomButton type="PRIMARY" onPress={handleNext} text="التالي" />
         <View style={styles.dots}>
@@ -100,16 +116,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 10,
   },
-  gridImage1: {width: '48%', height: 250, borderRadius: 10},
-  gridImage2: {width: '48%', height: 160, borderRadius: 10},
-  gridImage3: {width: '48%', height: 160, borderRadius: 10},
-  gridImage4: {
-    width: '48%',
-    height: 250,
+  gridImage: {
     borderRadius: 10,
-    position: 'absolute',
-    bottom: 7,
-    right: 0,
+    backgroundColor: '#fff', // Optional fallback if image not loaded
   },
   textContainer: {alignItems: 'center'},
   text: {
